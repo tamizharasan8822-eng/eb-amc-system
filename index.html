@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EB AMC Field Complaint Book</title>
+    <title>EB AMC Staff Complaint Portal</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f4f8; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         .container { background-color: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); width: 100%; max-width: 550px; box-sizing: border-box; }
         h2 { text-align: center; color: #d35400; margin-bottom: 25px; font-size: 24px; border-bottom: 3px solid #f1c40f; padding-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
         h3 { color: #2c3e50; margin-top: 35px; margin-bottom: 15px; font-size: 20px; border-left: 4px solid #d35400; padding-left: 8px; }
         .form-group { margin-bottom: 18px; }
+        .staff-section { background-color: #ebf5fb; padding: 15px; border-radius: 8px; border-left: 5px solid #2980b9; margin-bottom: 20px; }
+        .staff-section h4 { margin: 0 0 10px 0; color: #2980b9; font-size: 15px; text-transform: uppercase; }
         label { display: block; margin-bottom: 6px; color: #34495e; font-weight: 600; font-size: 14px; }
         input[type="text"], input[type="tel"], select, textarea { width: 100%; padding: 12px; border: 1px solid #bdc3c7; border-radius: 6px; box-sizing: border-box; font-size: 14px; transition: all 0.3s; }
         input[type="text"]:focus, input[type="tel"]:focus, select:focus, textarea:focus { border-color: #d35400; outline: none; box-shadow: 0 0 5px rgba(211, 84, 0, 0.2); }
@@ -29,9 +31,23 @@
 <body>
 
 <div class="container">
-    <h2>⚡ EB - AMC Complaint Register</h2>
+    <h2>⚡ EB - AMC Staff Complaint Register</h2>
     <form id="grievanceForm" onsubmit="submitGrievance(); return false;">
         
+        <!-- EB Staff Verification Section -->
+        <div class="staff-section">
+            <h4>🔒 EB Staff Authorization (அலுவலக ஊழியர்கள் மட்டும்)</h4>
+            <div class="form-group">
+                <label for="staffId">EB Staff ID No (ஊழியர் அடையாள எண்):<span class="required-star">*</span></label>
+                <input type="text" id="staffId" required placeholder="e.g., EBSTAFF123">
+            </div>
+            <div class="form-group">
+                <label for="staffName">Registered Staff Name (பதிவு செய்யும் ஊழியர் பெயர்):<span class="required-star">*</span></label>
+                <input type="text" id="staffName" required placeholder="e.g., K. Tamilarasan (AE/JE/Liaison)">
+            </div>
+        </div>
+
+        <!-- Consumer Details -->
         <div class="form-group">
             <label for="clientName">Consumer / Site Name (EB கஸ்டமர் பெயர்):<span class="required-star">*</span></label>
             <input type="text" id="clientName" required placeholder="e.g., Sri Lakshmi Textiles / SS Name">
@@ -71,7 +87,7 @@
 
         <div class="form-group">
             <label for="complaintDetails">Grievance / Fault Description:<span class="required-star">*</span></label>
-            <textarea id="complaintDetails" rows="4" required placeholder="Fault விவரங்களை இங்கே தெளிவாக டைப் செய்யவும்..."></textarea>
+            <textarea id="complaintDetails" rows="4" required placeholder="Fault விவரங்களை இங்கே தெளிவாக டைп செய்யவும்..."></textarea>
         </div>
 
         <div class="form-group">
@@ -79,8 +95,7 @@
             <input type="file" id="complaintPhoto" accept="image/*" required>
         </div>
 
-        <button type="submit">⚡ Book AMC Complaint Ticket</button>
-        <div id="regResult" class="alert"></div>
+        <button type="submit">⚡ Submit AMC Complaint (Office Only)</button>
     </form>
 
     <hr style="margin-top: 30px; border: 0; border-top: 1px dashed #bdc3c7;">
@@ -96,12 +111,14 @@
 
 <script>
     function submitGrievance() {
-        const name = document.getElementById('clientName').value;
-        const ebNo = document.getElementById('ebServiceNo').value;
-        const phone = document.getElementById('clientPhone').value;
+        const staffId = document.getElementById('staffId').value.trim();
+        const staffName = document.getElementById('staffName').value.trim();
+        const name = document.getElementById('clientName').value.trim();
+        const ebNo = document.getElementById('ebServiceNo').value.trim();
+        const phone = document.getElementById('clientPhone').value.trim();
         const breaker = document.getElementById('breakerType').value;
         const earth = document.getElementById('earthCondition').value;
-        const details = document.getElementById('complaintDetails').value;
+        const details = document.getElementById('complaintDetails').value.trim();
         const photoInput = document.getElementById('complaintPhoto');
 
         if (photoInput.files.length === 0) {
@@ -113,6 +130,8 @@
 
         const complaintData = {
             id: generatedId,
+            staffId: staffId,
+            staffName: staffName,
             clientName: name,
             ebServiceNo: ebNo,
             clientPhone: phone,
@@ -127,7 +146,7 @@
         localDB.push(complaintData);
         localStorage.setItem('eb_amc_db', JSON.stringify(localDB));
 
-        alert(`⚡ EB-AMC Complaint Registered Successfully!\n\nYour Ticket ID is: ${generatedId}\n\nSaved successfully in Cloud-Safe Browser Storage.`);
+        alert(`⚡ EB-AMC Complaint Registered Successfully by Staff: ${staffName}!\n\nTicket ID: ${generatedId}`);
         document.getElementById('grievanceForm').reset();
     }
 
@@ -150,6 +169,7 @@
             trackResult.innerHTML = `
                 <div style="text-align: left; color: #2c3e50;">
                     <p style="margin: 5px 0;"><strong>🎟 Ticket ID:</strong> <span style="color:#d35400; font-weight:bold;">${foundTicket.id}</span></p>
+                    <p style="margin: 5px 0; background-color: #e8f8f5; padding: 4px; border-radius:4px;"><strong>👮 Filed By Staff:</strong> ${foundTicket.staffName} (${foundTicket.staffId})</p>
                     <p style="margin: 5px 0;"><strong>👤 Consumer Name:</strong> ${foundTicket.clientName}</p>
                     <p style="margin: 5px 0;"><strong>⚡ EB Service No:</strong> ${foundTicket.ebServiceNo}</p>
                     <p style="margin: 5px 0;"><strong>📞 Contact No:</strong> ${foundTicket.clientPhone}</p>
